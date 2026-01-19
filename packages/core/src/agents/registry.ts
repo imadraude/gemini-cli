@@ -424,13 +424,22 @@ export class AgentRegistry {
       return 'No sub-agents are currently available.';
     }
 
-    let context = '## Available Sub-Agents\n';
-    context +=
-      'Use `delegate_to_agent` for complex tasks requiring specialized analysis.\n\n';
+    const agentsXml = Array.from(this.agents.entries())
+      .map(
+        ([name, def]) => `  <sub_agent>
+    <name>${name}</name>
+    <description>${def.description}</description>
+  </sub_agent>`,
+      )
+      .join('\n');
 
-    for (const [name, def] of this.agents) {
-      context += `- **${name}**: ${def.description}\n`;
-    }
-    return context;
+    return `
+# Sub-Agents
+You have access to the following specialized sub-agents. When a task aligns with a sub-agent's expertise, use \`delegate_to_agent\` to delegate work to that expert.
+
+<available_sub_agents>
+${agentsXml}
+</available_sub_agents>
+`;
   }
 }

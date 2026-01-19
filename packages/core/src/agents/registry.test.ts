@@ -780,4 +780,39 @@ describe('AgentRegistry', () => {
       );
     });
   });
+
+  describe('getDirectoryContext', () => {
+    it('should return default message when no agents are registered', () => {
+      expect(registry.getDirectoryContext()).toContain(
+        'No sub-agents are currently available',
+      );
+    });
+
+    it('should return XML formatted list of agents when agents are available', async () => {
+      await registry.testRegisterAgent(MOCK_AGENT_V1);
+      await registry.testRegisterAgent({
+        ...MOCK_AGENT_V1,
+        name: 'AnotherAgent',
+        description: 'Another agent description',
+      });
+
+      const context = registry.getDirectoryContext();
+
+      expect(context).toContain('# Sub-Agents');
+      expect(context).toContain(
+        "You have access to the following specialized sub-agents. When a task aligns with a sub-agent's expertise, use `delegate_to_agent` to delegate work to that expert.",
+      );
+      expect(context).toContain('<available_sub_agents>');
+      expect(context).toContain('<sub_agent>');
+      expect(context).toContain('<name>MockAgent</name>');
+      expect(context).toContain(
+        '<description>Mock Description V1</description>',
+      );
+      expect(context).toContain('<name>AnotherAgent</name>');
+      expect(context).toContain(
+        '<description>Another agent description</description>',
+      );
+      expect(context).toContain('</available_sub_agents>');
+    });
+  });
 });
